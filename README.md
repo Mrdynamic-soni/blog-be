@@ -1,1 +1,1 @@
-# blogging-be
+# blog-be
