@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import pool from '../db';
-import { generateToken } from '../utils/jwt';
+import jwt from 'jsonwebtoken';
 
 // Email and Password Validators
 const isValidEmail = (email: string): boolean => {
@@ -57,16 +57,45 @@ export const signup = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+
   try {
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    const user = result.rows[0];
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+
+    if (result.rowCount === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = generateToken(user.id);
-    res.status(200).json({ token });
-  } catch (err) {
-    res.status(500).json({ message: 'Login error', error: err });
+    const user = result.rows[0];
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string, {
+      expiresIn: '1d'
+    });
+
+    res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000
+      })
+      .json({ message: 'Login successful' });
+
+  } catch (err: any) {
+    res.status(500).json({ message: 'Login failed', error: err.message });
   }
 };
+
+
+export const logout = (req: Request, res: Response) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  }).json({ message: 'Logged out successfully' });
+};
+

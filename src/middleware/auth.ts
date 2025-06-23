@@ -1,23 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../utils/jwt';
+import jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
   userId?: number;
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ message: 'Unauthorized' });
-    return;
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized: No token' });
   }
 
   try {
-    const token = authHeader.split(' ')[1];
-    const payload = verifyToken(token);
-    req.userId = payload.userId;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: number };
+    req.userId = decoded.userId;
     next();
-  } catch {
-    res.status(401).json({ message: 'Invalid token' });
+  } catch (err) {
+    res.status(403).json({ message: 'Invalid token' });
   }
 };
