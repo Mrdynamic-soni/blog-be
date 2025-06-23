@@ -72,16 +72,22 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string, {
-      expiresIn: '1d'
-    });
-
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email, // ✅ Include email here
+      },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: '30d',
+      }
+    );
     res
       .cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
       })
       .json({ message: 'Login successful' });
 
@@ -91,11 +97,30 @@ export const login = async (req: Request, res: Response) => {
 };
 
 
+export const getMe = (req: Request, res: Response) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    return res.status(200).json({ user: decoded });
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  }).json({ message: 'Logged out successfully' });
+  res
+    .clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    })
+    .status(200)
+    .json({ message: 'Logged out successfully' });
 };
 

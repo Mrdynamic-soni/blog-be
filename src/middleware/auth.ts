@@ -5,11 +5,12 @@ export interface AuthRequest extends Request {
   userId?: number;
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const token = req.cookies.token;
 
   if (!token) {
-    return res.status(401).json({ message: 'Unauthorized: No token' });
+    res.status(401).json({ message: 'Unauthorized: No token' });
+    return;
   }
 
   try {

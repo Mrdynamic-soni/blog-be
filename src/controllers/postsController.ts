@@ -29,20 +29,32 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const getPosts = async (req: Request, res: Response) => {
   const { author } = req.query;
+
   try {
     let result;
+
     if (author) {
-      result = await pool.query('SELECT * FROM posts WHERE author_id = $1 ORDER BY created_at DESC', [author]);
+      result = await pool.query(
+        `SELECT posts.id, posts.title, posts.content, posts.created_at, users.email AS author_email
+         FROM posts
+         INNER JOIN users ON posts.author_id = users.id
+         WHERE users.id = $1
+         ORDER BY posts.created_at DESC`,
+        [author]
+      );
     } else {
-      result = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+      result = await pool.query(
+        `SELECT posts.id, posts.title, posts.content, posts.created_at, users.email AS author_email
+         FROM posts
+         INNER JOIN users ON posts.author_id = users.id
+         ORDER BY posts.created_at DESC`
+      );
     }
+
     res.status(200).json(result.rows);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching posts', error: err });
   }
 };
-
-
