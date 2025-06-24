@@ -3,9 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
-
-import authRouter from './routes/auth';
-import postRouter from './routes/posts';
+import authRouter from './routes/auth.js';
+import postRouter from './routes/posts.js';
 
 dotenv.config();
 
