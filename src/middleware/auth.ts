@@ -3,8 +3,9 @@ import jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
   userId?: number;
+  body: any;      // Add this line
+  cookies: any;   // Add this line
 }
-
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const token = req.cookies.token;
 
