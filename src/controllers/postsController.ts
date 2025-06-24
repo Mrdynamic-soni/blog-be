@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import pool from '../db';
+import { AuthRequest } from '../middleware/auth.js';
+import pool from '../db/index.js';
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   const { title, content ,userId} = req.body;
