@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(cors({
-  origin: 'http://localhost:3000', // frontend domain
+  origin: ['http://localhost:3000', 'https://blog-be-g7o8.onrender.com'], // frontend domain
   credentials: true
 }));
 app.use(express.json());
