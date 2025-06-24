@@ -29,13 +29,30 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
+
 export const getPosts = async (req: Request, res: Response) => {
-  const { author } = req.query;
+  const { author, postid } = req.query;
 
   try {
     let result;
 
+    if (postid) {
+      // Fetch a specific post by postid
+      result = await pool.query(
+        `SELECT posts.id, posts.title, posts.content, posts.created_at, users.email AS author_email
+         FROM posts
+         INNER JOIN users ON posts.author_id = users.id
+         WHERE posts.id = $1`,
+        [postid]
+      );
+      if (result.rowCount === 0) {
+        return res.status(404).json({ message: 'Post not found' });
+      }
+      return res.status(200).json(result.rows[0]);
+    }
+
     if (author) {
+      // Fetch all posts by a specific author
       result = await pool.query(
         `SELECT posts.id, posts.title, posts.content, posts.created_at, users.email AS author_email
          FROM posts
@@ -44,15 +61,16 @@ export const getPosts = async (req: Request, res: Response) => {
          ORDER BY posts.created_at DESC`,
         [author]
       );
-    } else {
-      result = await pool.query(
-        `SELECT posts.id, posts.title, posts.content, posts.created_at, users.email AS author_email
-         FROM posts
-         INNER JOIN users ON posts.author_id = users.id
-         ORDER BY posts.created_at DESC`
-      );
+      return res.status(200).json(result.rows);
     }
 
+    // Fetch all posts if no query param is provided
+    result = await pool.query(
+      `SELECT posts.id, posts.title, posts.content, posts.created_at, users.email AS author_email
+       FROM posts
+       INNER JOIN users ON posts.author_id = users.id
+       ORDER BY posts.created_at DESC`
+    );
     res.status(200).json(result.rows);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching posts', error: err });

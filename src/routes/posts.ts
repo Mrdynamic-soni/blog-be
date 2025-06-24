@@ -8,6 +8,8 @@ const router = express.Router();
 router.post('/post', authenticate, (req, res, next) => {
   Promise.resolve(createPost(req, res)).catch(next);
 });
-router.get('/posts', getPosts);
+router.get('/posts', (req, res, next) => {
+  Promise.resolve(getPosts(req, res)).catch(next);
+});
 
 export default router;
