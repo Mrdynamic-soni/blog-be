@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import pool from "../db/index.js";
+import pool from "../db";
 import jwt from "jsonwebtoken";
 
 // Email and Password Validators
