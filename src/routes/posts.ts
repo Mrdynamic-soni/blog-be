@@ -3,13 +3,13 @@ import { createPost, getPosts } from '../controllers/postsController';
 import { authenticate } from '../middleware/auth';
 
 
-const router = express.Router();
+const postRouter = express.Router();
 
-router.post('/post', authenticate, (req, res, next) => {
+postRouter.post('/post', authenticate, (req, res, next) => {
   Promise.resolve(createPost(req, res)).catch(next);
 });
-router.get('/posts', (req, res, next) => {
+postRouter.get('/posts', (req, res, next) => {
   Promise.resolve(getPosts(req, res)).catch(next);
 });
 
-export default router;
+export default postRouter;

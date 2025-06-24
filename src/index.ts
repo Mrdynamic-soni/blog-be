@@ -3,8 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
-import authRoutes from './routes/auth';
-import postRoutes from './routes/posts';
+
+import authRouter from './routes/auth';
+import postRouter from './routes/posts';
 
 dotenv.config();
 
@@ -23,8 +24,8 @@ app.get('/', (req, res) => {
   res.send('🚀 Blog API running');
 });
 
-app.use('/auth', authRoutes);
-app.use('/posts', postRoutes);
+app.use('/auth', authRouter);
+app.use('/posts', postRouter);
 
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
